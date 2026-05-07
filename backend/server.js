@@ -1,53 +1,50 @@
 const express = require('express');
 const cors = require('cors');
-const pool = require('./db');
+const dbPool = require('./db');
 require('dotenv').config();
 
 const app = express();
-const port = process.env.PORT || 3000;
+const appPort = process.env.PORT || 3000;
 
 app.use(cors());
 app.use(express.json());
 
-// get categories
 app.get('/api/categories', async (req, res) => {
     try {
-        const [rows] = await pool.query('SELECT id, name, slug FROM categories ORDER BY name ASC');
-        res.status(200).json(rows);
-    } catch (error) {
-        console.error('db error:', error);
-        res.status(500).json({ error: 'internal server error' });
+        const [cats] = await dbPool.query('SELECT id, name, slug FROM categories ORDER BY name ASC');
+        res.status(200).json(cats);
+    } catch (err) {
+        console.log('eroare la categorii: ', err);
+        res.status(500).json({ message: 'eroare de server' });
     }
 });
 
-// get products with optional category filter
 app.get('/api/products', async (req, res) => {
-    const categoryId = req.query.category_id;
+    const filterId = req.query.category_id;
 
     try {
-        let query = `
-            SELECT p.*, c.name as category_name 
-            FROM products p 
-            JOIN categories c ON p.category_id = c.id
-        `;
-        let params = [];
+        let sql = 'SELECT p.*, c.name as category_name FROM products p JOIN categories c ON p.category_id = c.id';
+        let queryParams = [];
 
-        if (categoryId) {
-            if (!/^\d+$/.test(categoryId)) {
-                return res.status(400).json({ error: 'invalid category_id' });
+        if (filterId) {
+            // validare parametru
+            if (isNaN(filterId)) {
+                return res.status(400).json({ message: 'id invalid' });
             }
-            query += ' WHERE p.category_id = ?';
-            params.push(Number(categoryId));
+            
+            sql = sql + ' WHERE p.category_id = ?';
+            queryParams.push(parseInt(filterId));
         }
 
-        const [rows] = await pool.query(query, params);
-        res.status(200).json(rows);
-    } catch (error) {
-        console.error('db error:', error);
-        res.status(500).json({ error: 'internal server error' });
+        const [prods] = await dbPool.query(sql, queryParams);
+        res.status(200).json(prods);
+        
+    } catch (err) {
+        console.log('eroare la produse: ', err);
+        res.status(500).json({ message: 'eroare de server' });
     }
 });
 
-app.listen(port, () => {
-    console.log(`server running on port ${port}`);
+app.listen(appPort, () => {
+    console.log(`api merge pe portul ${appPort}`);
 });
