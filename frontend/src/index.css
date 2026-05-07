@@ -22,6 +22,33 @@ header {
     border-bottom: 2px solid #ccc;
 }
 
+.controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.filter-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.filter-group label {
+    font-size: 12px;
+    font-weight: bold;
+    margin-bottom: 5px;
+    text-transform: uppercase;
+}
+
+.filter-group select, .filter-group input {
+    padding: 8px;
+    border: 1px solid #aaa;
+    border-radius: 3px;
+    font-size: 14px;
+    background-color: #fff;
+    min-width: 180px;
+}
+
 .product-list {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -33,6 +60,7 @@ header {
     background-color: #fff;
     padding: 15px;
     border-radius: 3px;
+    animation: fadeIn 0.4s ease-out forwards;
 }
 
 .card h2 {
@@ -62,6 +90,7 @@ header {
 .card.no-stock {
     opacity: 0.6;
     background-color: #e0e0e0;
+    animation: fadeInNoStock 0.4s ease-out forwards;
 }
 
 .card.no-stock .stock {
@@ -85,14 +114,6 @@ header {
         opacity: 1; 
         transform: translateY(0); 
     }
-}
-
-.card {
-    animation: fadeIn 0.4s ease-out forwards;
-}
-
-.card.no-stock {
-    animation: fadeInNoStock 0.4s ease-out forwards;
 }
 
 @keyframes fadeInNoStock {

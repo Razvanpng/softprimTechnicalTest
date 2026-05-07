@@ -5,6 +5,8 @@ function App() {
     const [categories, setCategories] = useState([]);
     const [products, setProducts] = useState([]);
     const [selectedCat, setSelectedCat] = useState('');
+    const [searchQuery, setSearchQuery] = useState('');
+    const [sortOrder, setSortOrder] = useState('asc');
     
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -45,18 +47,45 @@ function App() {
         }
     };
 
+    const finalProducts = products
+        .filter(p => p.name.toLowerCase().includes(searchQuery.toLowerCase()))
+        .sort((a, b) => {
+            if (sortOrder === 'asc') return Number(a.price) - Number(b.price);
+            return Number(b.price) - Number(a.price);
+        });
+
     return (
         <div className="app-container">
             <header>
                 <h1>Catalog Produse</h1>
-                <div className="filters">
-                    <label>Filtreaza: </label>
-                    <select value={selectedCat} onChange={handleFilterChange}>
-                        <option value="">Toate categoriile</option>
-                        {categories.map(c => (
-                            <option key={c.id} value={c.id}>{c.name}</option>
-                        ))}
-                    </select>
+                <div className="controls">
+                    <div className="filter-group">
+                        <label>categorie: </label>
+                        <select value={selectedCat} onChange={handleFilterChange}>
+                            <option value="">toate</option>
+                            {categories.map(c => (
+                                <option key={c.id} value={c.id}>{c.name}</option>
+                            ))}
+                        </select>
+                    </div>
+
+                    <div className="filter-group">
+                        <label>cauta: </label>
+                        <input 
+                            type="text" 
+                            placeholder="nume produs..." 
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                        />
+                    </div>
+
+                    <div className="filter-group">
+                        <label>pret: </label>
+                        <select value={sortOrder} onChange={(e) => setSortOrder(e.target.value)}>
+                            <option value="asc">crescator</option>
+                            <option value="desc">descrescator</option>
+                        </select>
+                    </div>
                 </div>
             </header>
 
@@ -65,13 +94,13 @@ function App() {
                 
                 {error && <p className="error">{error}</p>}
                 
-                {!loading && !error && products.length === 0 && (
-                    <p>nu exista produse in aceasta categorie.</p>
+                {!loading && !error && finalProducts.length === 0 && (
+                    <p>nu s-au gasit produse cu aceste filtre.</p>
                 )}
 
-                {!loading && !error && products.length > 0 && (
+                {!loading && !error && finalProducts.length > 0 && (
                     <div className="product-list">
-                        {products.map(p => (
+                        {finalProducts.map(p => (
                             <div key={p.id} className={`card ${p.stock === 0 ? 'no-stock' : ''}`}>
                                 <h2>{p.name}</h2>
                                 <span className="cat-name">{p.category_name}</span>
